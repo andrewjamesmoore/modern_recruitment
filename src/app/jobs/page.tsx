@@ -2,18 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  Search,
-  MapPin,
-  Briefcase,
-  Users,
-  TrendingUp,
-  Star,
-  ChevronDown,
-  Menu,
-  X,
-} from "lucide-react";
+import { Search, MapPin, Briefcase, ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,8 +32,8 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 import { COMPANY_NAME } from "@/lib/constants";
 
-// Mock job data
-const featuredJobs = [
+// Mock job data (same as home page)
+const allJobs = [
   {
     id: 1,
     title: "Senior Frontend Developer",
@@ -302,27 +291,126 @@ Benefits:
     tags: ["Node.js", "MongoDB", "GraphQL"],
     posted: "5 days ago",
   },
+  // Add more jobs to make it feel like a full jobs page
+  {
+    id: 7,
+    title: "Full Stack Developer",
+    company: "WebFlow Solutions",
+    location: "Remote",
+    type: "Full-time",
+    salary: "$90k - $130k",
+    expertise: "Frontend",
+    description:
+      "Build end-to-end web applications using modern technologies and frameworks.",
+    longDescription: `WebFlow Solutions is seeking a Full Stack Developer to join our remote team and help build innovative web applications for our clients.
+
+Key Responsibilities:
+• Develop both frontend and backend components of web applications
+• Work with React, Node.js, and modern JavaScript frameworks
+• Design and implement RESTful APIs and database schemas
+• Collaborate with designers and product managers
+• Ensure responsive design and cross-browser compatibility
+• Write clean, maintainable, and well-tested code
+• Participate in code reviews and technical discussions
+• Stay updated with latest web development trends
+
+Requirements:
+• 3+ years of full stack development experience
+• Proficiency in React, Node.js, and JavaScript/TypeScript
+• Experience with databases (PostgreSQL, MongoDB)
+• Knowledge of version control systems (Git)
+• Understanding of web security best practices
+• Experience with cloud platforms (AWS, Heroku)
+• Strong problem-solving and communication skills
+• Ability to work independently in a remote environment
+
+Benefits:
+• Competitive salary with annual bonuses
+• Fully remote work environment
+• Flexible working hours
+• Health and dental insurance
+• Professional development budget
+• Modern equipment and tools
+• Collaborative team culture
+• Opportunity to work on diverse projects`,
+    tags: ["React", "Node.js", "Full Stack"],
+    posted: "1 day ago",
+  },
+  {
+    id: 8,
+    title: "Mobile App Developer",
+    company: "AppCraft Studios",
+    location: "Miami, FL",
+    type: "Full-time",
+    salary: "$95k - $135k",
+    expertise: "Frontend",
+    description:
+      "Create amazing mobile experiences using React Native and native technologies.",
+    longDescription: `AppCraft Studios is looking for a Mobile App Developer to join our team and help create cutting-edge mobile applications for iOS and Android platforms.
+
+Key Responsibilities:
+• Develop cross-platform mobile applications using React Native
+• Implement native features and integrations
+• Collaborate with UI/UX designers to create intuitive interfaces
+• Optimize app performance and user experience
+• Write unit and integration tests
+• Publish apps to App Store and Google Play
+• Debug and resolve technical issues
+• Stay current with mobile development trends
+
+Requirements:
+• 3+ years of mobile app development experience
+• Strong proficiency in React Native and JavaScript
+• Experience with native iOS and Android development
+• Knowledge of mobile app architecture patterns
+• Familiarity with app store submission processes
+• Understanding of mobile UI/UX principles
+• Experience with testing frameworks
+• Strong attention to detail and quality
+
+Benefits:
+• Competitive salary and equity options
+• Comprehensive health benefits
+• Flexible work arrangements
+• Professional development opportunities
+• Modern office in downtown Miami
+• Team building events and outings
+• Creative and innovative work environment
+• Opportunity to work on high-impact projects`,
+    tags: ["React Native", "iOS", "Android"],
+    posted: "3 days ago",
+  },
 ];
 
-export default function Home() {
+export default function JobsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expertiseFilter, setExpertiseFilter] = useState("");
+  const [filteredJobs, setFilteredJobs] = useState(allJobs);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const router = useRouter();
 
-  // Redirect to jobs page with search query
+  // Filter jobs based on search and filters
   const handleFilter = () => {
-    const params = new URLSearchParams();
+    let filtered = allJobs;
+
     if (searchQuery) {
-      params.set("search", searchQuery);
-    }
-    if (expertiseFilter && expertiseFilter !== "all") {
-      params.set("expertise", expertiseFilter);
+      filtered = filtered.filter(
+        (job) =>
+          job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.tags.some((tag) =>
+            tag.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+      );
     }
 
-    const queryString = params.toString();
-    const url = queryString ? `/jobs?${queryString}` : "/jobs";
-    router.push(url);
+    if (expertiseFilter && expertiseFilter !== "all") {
+      filtered = filtered.filter(
+        (job) => job.expertise.toLowerCase() === expertiseFilter.toLowerCase()
+      );
+    }
+
+    setFilteredJobs(filtered);
   };
 
   return (
@@ -333,40 +421,22 @@ export default function Home() {
         <div className='container mx-auto px-4 py-4'>
           <div className='flex items-center justify-between'>
             {/* Logo */}
-            <div className='flex items-center space-x-2'>
+            <Link
+              href='/'
+              className='flex items-center space-x-2 hover:opacity-80 transition-opacity'
+            >
               <Briefcase className='h-8 w-8 text-primary' />
               <span className='text-l font-bold'>{COMPANY_NAME}</span>
-            </div>
-
-            {/* Search Field */}
-            <div className='hidden md:flex items-center gap-2 flex-1 max-w-2xl mx-8'>
-              <div className='flex-1 relative'>
-                <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                <Input
-                  placeholder='Search jobs, companies, locations...'
-                  className='pl-10'
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Button
-                onClick={handleFilter}
-                size='sm'
-                variant='secondary'
-                className='px-6'
-              >
-                <Search className='h-4 w-4' />
-              </Button>
-            </div>
+            </Link>
 
             {/* Desktop Right Side */}
             <div className='hidden md:flex items-center space-x-6'>
-              <Link
+              <a
                 href='/jobs'
-                className='text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'
+                className='text-sm font-medium text-foreground hover:text-foreground transition-colors border-b-2 border-primary'
               >
                 Find Jobs
-              </Link>
+              </a>
               <a
                 href='#'
                 className='text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'
@@ -402,13 +472,13 @@ export default function Home() {
           <div className='md:hidden bg-background border-t'>
             <div className='container mx-auto px-4 py-4'>
               <div className='flex flex-col space-y-4'>
-                <Link
+                <a
                   href='/jobs'
-                  className='text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2'
+                  className='text-sm font-medium text-foreground hover:text-foreground transition-colors py-2 border-l-4 border-primary pl-4'
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Find Jobs
-                </Link>
+                </a>
                 <a
                   href='#'
                   className='text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2'
@@ -454,73 +524,44 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Hero Section */}
-      <section className='relative py-16 overflow-hidden'>
-        {/* Content */}
-        <div className='container mx-auto px-4'>
-          <div className='grid md:grid-cols-2 gap-12 items-center'>
-            <div>
-              <h2 className='text-5xl font-bold mb-6'>
-                Innovative Hiring Solutions
-              </h2>
-              <p className='text-xl text-muted-foreground mb-8'>
-                Connect with top employers, explore exciting opportunities, and
-                take the next step in your professional journey with our modern
-                recruitment platform.
-              </p>
-              <div className='flex flex-col sm:flex-row gap-4'>
-                <Button size='lg' className='px-8' asChild>
-                  <Link href='/jobs'>Browse Jobs</Link>
-                </Button>
-                <Button size='lg' variant='outline' className='px-8'>
-                  Upload Resume
-                </Button>
-              </div>
-            </div>
-            <div className='grid grid-cols-2 gap-4'>
-              <Card>
-                <CardContent className='p-6 text-center'>
-                  <Users className='h-12 w-12 text-primary mx-auto mb-4' />
-                  <h3 className='text-2xl font-bold mb-2'>10K+</h3>
-                  <p className='text-muted-foreground'>Active Job Seekers</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className='p-6 text-center'>
-                  <Briefcase className='h-12 w-12 text-primary mx-auto mb-4' />
-                  <h3 className='text-2xl font-bold mb-2'>5K+</h3>
-                  <p className='text-muted-foreground'>Job Openings</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className='p-6 text-center'>
-                  <TrendingUp className='h-12 w-12 text-primary mx-auto mb-4' />
-                  <h3 className='text-2xl font-bold mb-2'>95%</h3>
-                  <p className='text-muted-foreground'>Success Rate</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className='p-6 text-center'>
-                  <Star className='h-12 w-12 text-primary mx-auto mb-4' />
-                  <h3 className='text-2xl font-bold mb-2'>4.9</h3>
-                  <p className='text-muted-foreground'>User Rating</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Jobs Section */}
-      <section className='py-16 bg-muted/50'>
-        <div className='container mx-auto px-4'>
-          <div className='text-center mb-12'>
-            <h2 className='text-4xl font-bold mb-4'>Featured Jobs</h2>
-            <p className='text-xl text-muted-foreground'>
-              Discover hand-picked opportunities from top companies
+      {/* Page Header */}
+      <div className='bg-background border-b'>
+        <div className='container mx-auto px-4 py-8'>
+          <div className='text-center'>
+            <h1 className='text-4xl font-bold mb-4'>Find Your Dream Job</h1>
+            <p className='text-xl text-muted-foreground mb-8'>
+              Explore {filteredJobs.length} opportunities from top companies
             </p>
           </div>
 
+          {/* Search Section */}
+          <div className='max-w-2xl mx-auto'>
+            <div className='flex flex-col md:flex-row gap-4'>
+              <div className='flex-1 relative'>
+                <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                <Input
+                  placeholder='Search jobs, companies, locations...'
+                  className='pl-10'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Button
+                onClick={handleFilter}
+                variant='secondary'
+                className='px-8'
+              >
+                <Search className='h-4 w-4 mr-2' />
+                Search Jobs
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Jobs Section */}
+      <section className='py-16'>
+        <div className='container mx-auto px-4'>
           {/* Filters */}
           <div className='flex flex-wrap gap-4 mb-8 justify-center'>
             <Select value={expertiseFilter} onValueChange={setExpertiseFilter}>
@@ -543,9 +584,17 @@ export default function Home() {
             </Button>
           </div>
 
+          {/* Results Count */}
+          <div className='text-center mb-8'>
+            <p className='text-muted-foreground'>
+              Showing {filteredJobs.length} job
+              {filteredJobs.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+
           {/* Job Cards */}
           <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {featuredJobs.map((job) => (
+            {filteredJobs.map((job) => (
               <Card key={job.id} className='hover:shadow-lg transition-shadow'>
                 <CardHeader>
                   <div className='flex justify-between items-start'>
@@ -637,202 +686,15 @@ export default function Home() {
             ))}
           </div>
 
+          {/* Load More */}
           <div className='text-center mt-12'>
-            <Button variant='outline' size='lg' asChild>
-              <Link href='/jobs'>
-                View All Jobs
-                <ChevronDown className='ml-2 h-4 w-4' />
-              </Link>
+            <Button variant='outline' size='lg'>
+              Load More Jobs
+              <ChevronDown className='ml-2 h-4 w-4' />
             </Button>
           </div>
         </div>
       </section>
-
-      {/* Marketing Section */}
-      <section className='py-16'>
-        <div className='container mx-auto px-4'>
-          <div className='text-center mb-12'>
-            <h2 className='text-4xl font-bold mb-4'>
-              Why Choose ModernRecruit?
-            </h2>
-            <p className='text-xl text-muted-foreground'>
-              We make job searching and hiring simple, efficient, and effective
-            </p>
-          </div>
-
-          <div className='grid md:grid-cols-3 gap-8'>
-            <Card className='text-center'>
-              <CardContent className='p-8'>
-                <div className='bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6'>
-                  <Search className='h-8 w-8 text-primary' />
-                </div>
-                <h3 className='text-xl font-semibold mb-4'>
-                  Smart Job Matching
-                </h3>
-                <p className='text-muted-foreground'>
-                  Our AI-powered algorithm matches you with the most relevant
-                  job opportunities based on your skills and preferences.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className='text-center'>
-              <CardContent className='p-8'>
-                <div className='bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6'>
-                  <Users className='h-8 w-8 text-primary' />
-                </div>
-                <h3 className='text-xl font-semibold mb-4'>Top Companies</h3>
-                <p className='text-muted-foreground'>
-                  Connect with leading companies across various industries, from
-                  startups to Fortune 500 enterprises.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className='text-center'>
-              <CardContent className='p-8'>
-                <div className='bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6'>
-                  <TrendingUp className='h-8 w-8 text-primary' />
-                </div>
-                <h3 className='text-xl font-semibold mb-4'>Career Growth</h3>
-                <p className='text-muted-foreground'>
-                  Access career resources, salary insights, and professional
-                  development opportunities to advance your career.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className='bg-muted py-12'>
-        <div className='container mx-auto px-4'>
-          <div className='grid md:grid-cols-4 gap-8'>
-            <div>
-              <div className='flex items-center space-x-2 mb-4'>
-                <Briefcase className='h-6 w-6 text-primary' />
-                <span className='text-xl font-bold'>ModernRecruit</span>
-              </div>
-              <p className='text-muted-foreground mb-4'>
-                Your trusted partner in finding the perfect career opportunity.
-              </p>
-              <div className='flex space-x-4'>
-                <Button variant='ghost' size='icon'>
-                  <svg
-                    className='h-4 w-4'
-                    fill='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path d='M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z' />
-                  </svg>
-                </Button>
-                <Button variant='ghost' size='icon'>
-                  <svg
-                    className='h-4 w-4'
-                    fill='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path d='M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z' />
-                  </svg>
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <h3 className='font-semibold mb-4'>For Job Seekers</h3>
-              <ul className='space-y-2 text-muted-foreground'>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Browse Jobs
-                  </a>
-                </li>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Career Advice
-                  </a>
-                </li>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Resume Builder
-                  </a>
-                </li>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Salary Guide
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className='font-semibold mb-4'>For Employers</h3>
-              <ul className='space-y-2 text-muted-foreground'>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Post a Job
-                  </a>
-                </li>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Browse Resumes
-                  </a>
-                </li>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Hiring Solutions
-                  </a>
-                </li>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Pricing
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className='font-semibold mb-4'>Company</h3>
-              <ul className='space-y-2 text-muted-foreground'>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Contact
-                  </a>
-                </li>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href='#' className='hover:text-foreground'>
-                    Terms of Service
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <Separator className='my-8' />
-
-          <div className='flex flex-col md:flex-row justify-between items-center'>
-            <p className='text-muted-foreground'>
-              © 2024 ModernRecruit. All rights reserved.
-            </p>
-            <div className='flex items-center space-x-4 mt-4 md:mt-0'>
-              <ThemeToggle />
-              <span className='text-sm text-muted-foreground'>
-                Made with ❤️ for job seekers
-              </span>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
